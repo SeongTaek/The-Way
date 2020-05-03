@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/1.Scenes/BezierCurve.unity
+- path: Assets/1.Scenes/SplineCurve.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
