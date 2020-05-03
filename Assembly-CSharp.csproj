@@ -64,6 +64,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\2.Scripts\BezierCurve\BezierCurve.cs" />
+    <Compile Include="Assets\2.Scripts\Common\PointWithVector.cs" />
+    <Compile Include="Assets\2.Scripts\SplineCurve\SplineCurve.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/ljslo/Desktop/Projects/The Way/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

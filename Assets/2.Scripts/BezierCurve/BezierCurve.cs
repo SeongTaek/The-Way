@@ -16,10 +16,6 @@ public class BezierCurve : MonoBehaviour
     private void Start()
     {
         _lineRenderer.positionCount = _numPoints;
-
-        //DrawLinearCurve();
-        //DrawQuadraticCurve();
-        //DrawCubicCurve();
     }
 
     private void Update()
