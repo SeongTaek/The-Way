@@ -10,34 +10,35 @@ namespace Creataek.TheWay.Curve
     public class SplineCurve : MonoBehaviour
     {
         [SerializeField]
-        private LineRenderer[] _lineRenderer;
-
-        [SerializeField]
-        private PointWithVector point0, point1, point2, point3, point4;
+        private Knot point0, point1, point2, point3, point4;
 
         [SerializeField]
         private float _tensionOfCardinalSplines = 0.0f;
 
-        private int _numPoints = 50;
-        private Vector3[] _positions = new Vector3[50];
-
         private void Start()
         {
-            for (int i = 0; i < _lineRenderer.Length; ++i)
-            {
-                _lineRenderer[i].positionCount = _numPoints;
-            }
         }
 
         private void Update()
         {
-            DrawCardinalSplines();
         }
 
-        private void DrawCubicHermitSplines()
+        private static void DrawCubicHermitSplines(List<Knot> knotList)
         {
-            _positions = new Vector3[50];
+            if(knotList.Count < 2)
+            {
+                return;
+            }
 
+            int numPoints = 50;
+
+            for (int i = 0; i < knotList.Count; i += 2)
+            {
+                var knot0 = knotList[i];
+                var knot1 = knotList[i + 1];
+                var positions = new Vector3[numPoints];
+            }
+            /*
             for (int i = 0; i < _numPoints; ++i)
             {
                 float t = i / (float)_numPoints;
@@ -78,22 +79,22 @@ namespace Creataek.TheWay.Curve
                 _positions[i] = CalculateCubicHermitSplinesPoint(t, point3, point4);
             }
 
-            _lineRenderer[3].SetPositions(_positions);
+            _lineRenderer[3].SetPositions(_positions);*/
         }
 
-        private void DrawCatmullRomSplines()
+        private static void DrawCatmullRomSplines(List<Knot> knotList)
         {
-            CalculateCatmullRomSplinesPoint(new PointWithVector[] { point0, point1, point2, point3, point4 });
-            DrawCubicHermitSplines();
+            UpdateCatmullRomSplinesPoint(knotList);
+            DrawCubicHermitSplines(knotList);
         }
 
-        private void DrawCardinalSplines()
+        public static void DrawCardinalSplines(List<Knot> knotList, float tension)
         {
-            CalculateCardinalSplinesPoint(_tensionOfCardinalSplines, new PointWithVector[] { point0, point1, point2, point3, point4 });
-            DrawCubicHermitSplines();
+            UpdateCardinalSplinesPoint(tension, knotList);
+            DrawCubicHermitSplines(knotList);
         }
 
-        private Vector3 CalculateCubicHermitSplinesPoint(float t, PointWithVector pv0, PointWithVector pv1)
+        public static Vector3 CalculateCubicHermitSplinesPoint(float t, Knot pv0, Knot pv1)
         {
             // s = (1-t)
             // P(t) = s2(1+2t) P0 + t2(1+2s) P1 + s2tU–st2V
@@ -104,21 +105,29 @@ namespace Creataek.TheWay.Curve
             return (ss * (1 + 2 * t) * pv0.Point) + (tt * (1 + 2 * s) * pv1.Point) + (ss * t * pv0.Vector - s * tt * pv1.Vector);
         }
 
-        private void CalculateCatmullRomSplinesPoint(PointWithVector[] pvArray)
+        public static void UpdateCatmullRomSplinesPoint(List<Knot> knotList)
         {
-            for (int i = 1; i < pvArray.Length - 1; ++i)
+            for (int i = 1; i < knotList.Count - 1; ++i)
             {
-                pvArray[i].dir = (pvArray[i + 1].Point - pvArray[i - 1].Point).normalized;
-                pvArray[i].magnitude = (pvArray[i + 1].Point - pvArray[i - 1].Point).magnitude * 0.5f;
+                knotList[i].dir = (knotList[i + 1].Point - knotList[i - 1].Point).normalized;
+                knotList[i].magnitude = (knotList[i + 1].Point - knotList[i - 1].Point).magnitude * 0.5f;
             }
         }
 
-        private void CalculateCardinalSplinesPoint(float tension, PointWithVector[] pvArray)
+        public static void UpdateCardinalSplinesPoint(float tension, List<Knot> knotList)
         {
-            for (int i = 1; i < pvArray.Length - 1; ++i)
+            if (knotList.Count == 0)
             {
-                pvArray[i].dir = (pvArray[i + 1].Point - pvArray[i - 1].Point).normalized;
-                pvArray[i].magnitude = (1.0f - tension) * (pvArray[i + 1].Point - pvArray[i - 1].Point).magnitude * 0.5f;
+                return;
+            }
+
+            knotList[0].dir = knotList[knotList.Count - 1].dir = Vector3.zero;
+            knotList[0].magnitude = knotList[knotList.Count - 1].magnitude = 0.0f;
+
+            for (int i = 1; i < knotList.Count - 1; ++i)
+            {
+                knotList[i].dir = (knotList[i + 1].Point - knotList[i - 1].Point).normalized;
+                knotList[i].magnitude = (1.0f - tension) * (knotList[i + 1].Point - knotList[i - 1].Point).magnitude * 0.5f;
             }
         }
     }
